@@ -60,7 +60,7 @@ current_screen = "menu"
 def draw_menu_button():
     menu_text = font.render("Menu", True, BLACK)
     menu_rect = menu_text.get_rect(center=(SCREEN_WIDTH - 50, 50))
-    pygame.draw.rect(screen, GRAY, menu_rect.inflate(20, 10))
+    pygame.draw.rect(screen, GRAY, menu_rect.inflate(20, 10), border_radius=10)
     screen.blit(menu_text, menu_rect)
 
 # Hàm cập nhật bàn cờ để có cặp giá trị hợp lệ
@@ -366,7 +366,10 @@ def handle_menu_click(pos):
                 current_screen = "game"
                 play_game_music()
             elif i == 1:
-                grid_size = (grid_size % 6) + 3
+                if grid_size == 4:
+                    grid_size = 6
+                else:
+                    grid_size = 4
             elif i == 2:
                 next_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
                 next_surface.fill(WHITE)
