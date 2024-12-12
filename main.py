@@ -63,16 +63,49 @@ def draw_menu_button():
     pygame.draw.rect(screen, GRAY, menu_rect.inflate(20, 10))
     screen.blit(menu_text, menu_rect)
 
+# Hàm cập nhật bàn cờ để có cặp giá trị hợp lệ
 def update_grid_for_valid_pair(grid, target):
+    # Lấy kích thước của bàn cờ
     size = len(grid)
+    
+    # Lấy danh sách các ô đã có giá trị trên bàn cờ
     existing_cells = [(row, col) for row in range(size) for col in range(size) if grid[row][col] is not None]
     
+    # Nếu có ít hơn 2 ô đã có giá trị, không cần cập nhật
     if len(existing_cells) < 2:
         return
 
+    # Tạo giá trị ngẫu nhiên cho tất cả các ô đã có giá trị
+    for row, col in existing_cells:
+        grid[row][col] = random.randint(0, 9)
+    
+    # Chọn ngẫu nhiên 2 ô đã có giá trị
     (row1, col1), (row2, col2) = random.sample(existing_cells, 2)
-    num1 = random.randint(0, 9)
-    num2 = target - num1 if random.choice([True, False]) else target + num1
+    
+    checktmp=False
+    while checktmp==False:
+        # Tạo giá trị cho ô thứ nhất
+        num1 = random.randint(0, 9)
+        checktmp=True
+        
+        # Tạo giá trị cho ô thứ hai sao cho tổng hoặc hiệu của 2 giá trị bằng với số mục tiêu
+        if random.choice([True, False]):
+            # Tổng của 2 giá trị bằng với số mục tiêu
+            num2 = target - num1
+            # Đảm bảo giá trị của ô thứ hai nằm trong 0 đến 9
+            if num2 < 0 or num2>9:
+                num2 = 0
+                checktmp=False
+            
+        else:
+            # Hiệu của 2 giá trị bằng với số mục tiêu
+            num2 = num1 - target
+            # Đảm bảo giá trị của ô thứ hai nằm trong 0 đến 9
+            if num2 < 0 or num2>9:
+                num2 = 0
+                checktmp=False
+    
+    # Cập nhật giá trị của 2 ô đã chọn
     grid[row1][col1] = num1
     grid[row2][col2] = num2
 
@@ -113,7 +146,7 @@ def draw_grid():
             x = start_x + col * (CELL_SIZE + GRID_PADDING)
             y = start_y + row * (CELL_SIZE + GRID_PADDING)
             color = BLUE if (row, col) in selected_cells else WHITE
-            pygame.draw.rect(screen, color, (x, y, CELL_SIZE, CELL_SIZE))
+            pygame.draw.rect(screen, color, (x, y, CELL_SIZE, CELL_SIZE), border_radius=5)
             number = numbers[row][col]
             if number is not None:
                 text = font.render(str(number), True, BLACK)
@@ -164,21 +197,36 @@ def has_valid_pair(grid, target):
                             return True
     return False
 
+# Kiểm tra xem người chơi đã chọn đủ 2 ô hay chưa
 def check_selection():
+    # Nếu người chơi đã chọn đủ 2 ô
     if len(selected_cells) == 2:
+        # Lấy thông tin về 2 ô đã chọn
         global score, numbers
         cell1 = selected_cells[0]
         cell2 = selected_cells[1]
+        
+        # Lấy giá trị của 2 ô đã chọn
         num1 = numbers[cell1[0]][cell1[1]]
         num2 = numbers[cell2[0]][cell2[1]]
+        
+        # Kiểm tra xem 2 ô đã chọn có giá trị hợp lệ hay không
         if num1 is not None and num2 is not None:
+            # Kiểm tra xem tổng hoặc hiệu của 2 giá trị có bằng với số mục tiêu hay không
             if num1 + num2 == target_number or abs(num1 - num2) == target_number:
+                # Nếu đúng, xóa 2 ô đã chọn và tăng điểm
                 numbers[cell1[0]][cell1[1]] = None
                 numbers[cell2[0]][cell2[1]] = None
                 score += 1
+                # Phát âm thanh hoàn thành
                 complete_sound.play()
+        
+        # Xóa thông tin về 2 ô đã chọn
         selected_cells.clear()
+        
+        # Kiểm tra xem còn cặp giá trị hợp lệ nào trên bàn cờ hay không
         if not has_valid_pair(numbers, target_number):
+            # Nếu không, cập nhật bàn cờ để có cặp giá trị hợp lệ
             update_grid_for_valid_pair(numbers, target_number)
 
 def handle_click(pos):
