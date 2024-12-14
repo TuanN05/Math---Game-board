@@ -3,7 +3,6 @@ pygame.mixer.init()
 click_sound = pygame.mixer.Sound('sounds/button01.mp3.wav')  # Load the sound
 complete_sound = pygame.mixer.Sound('sounds/completetask_0.mp3')  # Load the sound
 import random
-import sys
 
 def slide_transition(current_surface, next_surface, direction="left", speed=20):
     """
@@ -56,11 +55,14 @@ clock = pygame.time.Clock()
 time_left = 60
 high_score = 0
 current_screen = "menu"
+level = "Easy"  # Mặc định là Easy
+
+#font = pygame.font.Font('arial.ttf', 10)
 
 def draw_menu_button():
     menu_text = font.render("Menu", True, BLACK)
     menu_rect = menu_text.get_rect(center=(SCREEN_WIDTH - 50, 50))
-    pygame.draw.rect(screen, GRAY, menu_rect.inflate(20, 10), border_radius=10)
+    pygame.draw.rect(screen, GRAY, menu_rect.inflate(20, 10), border_radius=10)  # Thay đổi từ (20, 10) thành (10, 5)
     screen.blit(menu_text, menu_rect)
 
 # Hàm cập nhật bàn cờ để có cặp giá trị hợp lệ
@@ -294,7 +296,7 @@ def set_menu_background():
 
 def draw_button_with_rounded_corners(surface, text, pos, is_flashing):
     button_color = GRAY if not is_flashing else RED
-    button_width = 300  # Thay đổi chiều rộng nút
+    button_width = 400  # Thay đổi chiều rộng nút
     button_height = 50   # Chiều cao nút
     button_rect = pygame.Rect(pos[0] - button_width // 2, pos[1] - button_height // 2, button_width, button_height)  # Kích thước nút
 
@@ -310,18 +312,17 @@ def draw_button_with_rounded_corners(surface, text, pos, is_flashing):
     text_rect = button_text.get_rect(center=button_rect.center)
     surface.blit(button_text, text_rect)
 
-def draw_menu(is_flashing=None):
-    
-    screen.blit(prepare_menu_surface(), (0, 0))
-    set_menu_background()
-    buttons = [
-        ("Play New Game", (SCREEN_WIDTH // 2, 250)),
-        ("Choose Level", (SCREEN_WIDTH // 2, 350)),
-        ("View High Scores", (SCREEN_WIDTH // 2, 450)),
-    ]
-    for i, (text, pos) in enumerate(buttons):
-        draw_button_with_rounded_corners(screen, text, pos, is_flashing == i)  # Vẽ nút với góc bo tròn và đổ bóng
-    pygame.display.flip()
+def draw_menu(is_flashing=None): 
+    screen.blit(prepare_menu_surface(), (0, 0)) 
+    set_menu_background() 
+    buttons = [ 
+        ("Play New Game", (SCREEN_WIDTH // 2, 250)), 
+        (f"Choose Level: {level}", (SCREEN_WIDTH // 2, 350)),  # Hiển thị cấp độ hiện tại
+        ("View High Scores", (SCREEN_WIDTH // 2, 450)), 
+    ] 
+    for i, (text, pos) in enumerate(buttons): 
+        draw_button_with_rounded_corners(screen, text, pos, is_flashing == i)  # Vẽ nút với góc bo tròn và đổ bóng 
+    pygame.display.flip() 
 
 def slide_menu_transition(current_surface, next_surface, direction="right", speed=20):
     """
@@ -345,7 +346,7 @@ def slide_menu_transition(current_surface, next_surface, direction="right", spee
         clock.tick(60)
 
 def handle_menu_click(pos):
-    global current_screen, grid_size
+    global current_screen, grid_size, level
     x, y = pos
     buttons = [
         ("Play New Game", (SCREEN_WIDTH // 2, 250)),
@@ -370,6 +371,11 @@ def handle_menu_click(pos):
                     grid_size = 6
                 else:
                     grid_size = 4
+                    
+                if level == "Easy": 
+                    level = "Hard" 
+                else: 
+                    level = "Easy" 
             elif i == 2:
                 next_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
                 next_surface.fill(WHITE)
@@ -381,16 +387,25 @@ def handle_menu_click(pos):
 def prepare_high_score_surface():
     high_score_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     high_score_surface.fill(WHITE)
+    
     title_text = font.render("High Score", True, BLACK)
     title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
     high_score_surface.blit(title_text, title_rect)
+    
     score_text = font.render(f"High Score: {high_score}", True, BLACK)
     score_rect = score_text.get_rect(center=(SCREEN_WIDTH // 2, 300))
     high_score_surface.blit(score_text, score_rect)
+    
+    # Hiển thị dòng "Time Left"
+    time_left_text = font.render(f"Time Left: {time_left}", True, BLACK)  # Giả sử bạn có biến time_left
+    time_left_rect = time_left_text.get_rect(center=(SCREEN_WIDTH // 2, 400))  # Vị trí hiển thị
+    high_score_surface.blit(time_left_text, time_left_rect)
+    
     back_text = font.render("Back to Menu", True, BLACK)
     back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2, 500))
     pygame.draw.rect(high_score_surface, GRAY, back_rect.inflate(20, 10))
     high_score_surface.blit(back_text, back_rect)
+    
     return high_score_surface
 
 def draw_high_score():
@@ -468,9 +483,25 @@ def play_menu_music():
     pygame.mixer.music.load('sounds/TownTheme.mp3')  # Thay đổi đường dẫn đến file nhạc nền menu của bạn
     pygame.mixer.music.play(-1)  # Phát nhạc lặp lại vô hạn
 
+def save_high_score(score, time_left, filename='high_score.txt'):
+    """Lưu điểm cao và thời gian vào file."""
+    with open(filename, 'w') as file:
+        file.write(f"{score}\n{time_left}")
+
+def load_high_score(filename='high_score.txt'):
+    """Đọc điểm cao và thời gian từ file."""
+    try:
+        with open(filename, 'r') as file:
+            score = int(file.readline().strip())
+            #time_left = float(file.readline().strip())
+            return score
+    except FileNotFoundError:
+        return 0  # Trả về 0 điểm và 60 giây nếu file không tồn tại
+
 def main():
     global current_screen, high_score, score, time_left, is_paused
 
+    high_score = load_high_score()  # Tải điểm cao từ file
     running = True
     play_menu_music()
     while running:
@@ -482,9 +513,11 @@ def main():
                 continue
             if time_left <= 0:
                 high_score = max(high_score, score)
+                save_high_score(high_score, time_left)
                 current_screen = "game_over"
             elif all(cell is None for row in numbers for cell in row):
                 high_score = max(high_score, score)
+                save_high_score(high_score, time_left)
                 current_screen = "win"
             else:
                 screen.fill(BLACK)
