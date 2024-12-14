@@ -1,0 +1,6 @@
+hiện level để lựa chọn
+hiệu ứng màu xanh/đỏ khi chọn đúng/sai
+màn hình win
+màn hình game over
+màn hình high score
+lưu trữ high score

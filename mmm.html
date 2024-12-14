@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Bán Hàng</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <div class="logo">ShopOnline</div>
+      <nav>
+        <ul>
+          <li><a href="#home">Trang chủ</a></li>
+          <li><a href="#products">Sản phẩm</a></li>
+          <li><a href="#about">Giới thiệu</a></li>
+          <li><a href="#contact">Liên hệ</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <section id="home">
+      <div class="banner">
+        <h1>Chào mừng đến với ShopOnline</h1>
+        <p>Mua sắm trực tuyến dễ dàng và tiện lợi</p>
+      </div>
+    </section>
+
+    <section id="products">
+      <h2>Sản phẩm nổi bật</h2>
+      <div class="product-list">
+        <div class="product">
+          <img src="product1.jpg" alt="Product 1" />
+          <h3>Áo Thun</h3>
+          <p>200,000 VND</p>
+          <button>Thêm vào giỏ hàng</button>
+        </div>
+        <div class="product">
+          <img src="product2.jpg" alt="Product 2" />
+          <h3>Quần Jeans</h3>
+          <p>400,000 VND</p>
+          <button>Thêm vào giỏ hàng</button>
+        </div>
+        <div class="product">
+          <img src="product3.jpg" alt="Product 3" />
+          <h3>Giày Thể Thao</h3>
+          <p>600,000 VND</p>
+          <button>Thêm vào giỏ hàng</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <h2>Về chúng tôi</h2>
+      <p>
+        ShopOnline là nền tảng mua sắm trực tuyến uy tín và chất lượng. Chúng
+        tôi cung cấp các sản phẩm đa dạng với giá cả hợp lý và dịch vụ khách
+        hàng tận tâm.
+      </p>
+    </section>
+
+    <section id="contact">
+      <h2>Liên hệ</h2>
+      <form>
+        <label for="name">Họ và tên:</label>
+        <input type="text" id="name" name="name" required />
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required />
+
+        <label for="message">Tin nhắn:</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+
+        <button type="submit">Gửi</button>
+      </form>
+    </section>
+
+    <footer>
+      <p>&copy; 2024 ShopOnline. All rights reserved.</p>
+    </footer>
+  </body>
+</html>
