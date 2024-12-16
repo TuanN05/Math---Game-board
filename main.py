@@ -5,6 +5,8 @@ complete_sound = pygame.mixer.Sound('sounds/completetask_0.mp3')  # Load the sou
 wrong_sound=pygame.mixer.Sound("sounds/wrong.mp3")
 import random
 
+click_sound.set_volume(0.3)
+
 def slide_transition(current_surface, next_surface, direction="left", speed=20):
     """
     Hiệu ứng chuyển màn hình với trượt ngang.
@@ -455,18 +457,54 @@ def draw_game_over():
 def prepare_win_surface():
     win_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     win_surface.fill(WHITE)
-    win_text = font.render("You Win!", True, BLACK)
-    win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
-    win_surface.blit(win_text, win_rect)
+    # win_text = font.render("You Win!", True, BLACK)
+    # win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
+    # win_surface.blit(win_text, win_rect)
+    # final_score_text = font.render(f"Your Score: {score}", True, BLACK)
+    # final_score_rect = final_score_text.get_rect(center=(SCREEN_WIDTH // 2, 300))
+    # win_surface.blit(final_score_text, final_score_rect)
+    # back_text = font.render("Back to Menu", True, BLACK)
+    # back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2, 500))
+    # pygame.draw.rect(win_surface, GRAY, back_rect.inflate(20, 10))
+    # win_surface.blit(back_text, back_rect)
+    
+     # Tải ảnh nền và thay đổi kích thước
+    background_image = pygame.image.load('normal.png')
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH+100, SCREEN_HEIGHT+100))  # Thay đổi kích thước ảnh nền
+
+    win_surface.blit(background_image, (0, 0))  # Vẽ ảnh nền đã được thay đổi kích thước
+    
+    # Tạo một bề mặt mờ với cùng kích thước
+    overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    overlay_surface.fill((255, 255, 255))  # Màu trắng
+    overlay_surface.set_alpha(128)  # Đặt độ trong suốt (0-255, 0 là trong suốt hoàn toàn, 255 là không trong suốt)
+
+    # Vẽ bề mặt mờ lên bề mặt chính
+    win_surface.blit(overlay_surface, (0, 0))
+    
+    new_width=400
+    new_height=200
+    win_img = pygame.image.load("youwin.png")
+    win_img = pygame.transform.scale(win_img, (new_width, new_height))  # Thay đổi kích thước của win_img
+
+    # Tính toán vị trí để vẽ win_img ở giữa
+    win_x = (SCREEN_WIDTH - new_width) / 2
+    win_y = (SCREEN_HEIGHT - new_height) / 2-100
+
+    # Vẽ win_img lên bề mặt
+    win_surface.blit(win_img, (win_x, win_y))
+    
     final_score_text = font.render(f"Your Score: {score}", True, BLACK)
-    final_score_rect = final_score_text.get_rect(center=(SCREEN_WIDTH // 2, 300))
+    final_score_rect = final_score_text.get_rect(center=(SCREEN_WIDTH // 2, 400))
     win_surface.blit(final_score_text, final_score_rect)
     back_text = font.render("Back to Menu", True, BLACK)
     back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2, 500))
     pygame.draw.rect(win_surface, GRAY, back_rect.inflate(20, 10))
     win_surface.blit(back_text, back_rect)
 
-    play_menu_music()
+    #play_win_music()
+
+    #play_menu_music()
     return win_surface
 
 def draw_win_screen():
@@ -486,6 +524,13 @@ def play_menu_music():
     """
     pygame.mixer.music.load('sounds/TownTheme.mp3')  # Thay đổi đường dẫn đến file nhạc nền menu của bạn
     pygame.mixer.music.play(-1)  # Phát nhạc lặp lại vô hạn
+    
+def play_win_music():
+    """
+    Phát nhạc nền cho màn hình menu.
+    """
+    pygame.mixer.music.load('sounds/youwin.mp3')  # Thay đổi đường dẫn đến file nhạc nền menu của bạn
+    pygame.mixer.music.play(1)  
 
 def save_high_score(score, time_left, filename='high_score.txt'):
     """Lưu điểm cao và thời gian vào file."""
@@ -523,6 +568,7 @@ def main():
                 high_score = max(high_score, score)
                 save_high_score(high_score, time_left)
                 current_screen = "win"
+                play_win_music()
             else:
                 screen.fill(BLACK)
                 draw_header()
@@ -552,6 +598,7 @@ def main():
                 elif current_screen == "win":
                     if 480 < event.pos[1] < 520:
                         current_screen = "menu"
+                        play_menu_music()
 
         if current_screen == "game" and not is_paused:
             check_selection()
