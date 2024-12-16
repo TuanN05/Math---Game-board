@@ -2,6 +2,7 @@ import pygame
 pygame.mixer.init()
 click_sound = pygame.mixer.Sound('sounds/button01.mp3.wav')  # Load the sound
 complete_sound = pygame.mixer.Sound('sounds/completetask_0.mp3')  # Load the sound
+wrong_sound=pygame.mixer.Sound("sounds/wrong.mp3")
 import random
 
 def slide_transition(current_surface, next_surface, direction="left", speed=20):
@@ -222,6 +223,8 @@ def check_selection():
                 score += 1
                 # Phát âm thanh hoàn thành
                 complete_sound.play()
+            else:
+                wrong_sound.play()
         
         # Xóa thông tin về 2 ô đã chọn
         selected_cells.clear()
@@ -235,6 +238,8 @@ def handle_click(pos):
     x, y = pos
     if SCREEN_WIDTH - 70 < x < SCREEN_WIDTH - 30 and 30 < y < 70:
         global current_screen, is_paused
+        click_sound.play()  # Phát âm thanh khi nhấn nút
+        play_menu_music()
         print("Đã nhấn Menu")
         current_surface = screen.copy()  # Sao chép màn hình hiện tại
         next_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Tạo màn hình mới cho menu
@@ -243,8 +248,7 @@ def handle_click(pos):
         slide_menu_transition(current_surface, next_surface, direction="right", speed=30)  # Thực hiện hiệu ứng trượt
         current_screen = "menu"  # Cập nhật trạng thái màn hình hiện tại
         is_paused = False  # Đặt trạng thái tạm dừng thành False
-        click_sound.play()  # Phát âm thanh khi nhấn nút
-        play_menu_music()
+        
 
     if y > HEADER_HEIGHT:
         # Tính toán vị trí bắt đầu của lưới
