@@ -455,56 +455,45 @@ def draw_game_over():
     pygame.display.flip()
 
 def prepare_win_surface():
+    # Tạo bề mặt cho màn hình chiến thắng
     win_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    win_surface.fill(WHITE)
-    # win_text = font.render("You Win!", True, BLACK)
-    # win_rect = win_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
-    # win_surface.blit(win_text, win_rect)
-    # final_score_text = font.render(f"Your Score: {score}", True, BLACK)
-    # final_score_rect = final_score_text.get_rect(center=(SCREEN_WIDTH // 2, 300))
-    # win_surface.blit(final_score_text, final_score_rect)
-    # back_text = font.render("Back to Menu", True, BLACK)
-    # back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2, 500))
-    # pygame.draw.rect(win_surface, GRAY, back_rect.inflate(20, 10))
-    # win_surface.blit(back_text, back_rect)
-    
-     # Tải ảnh nền và thay đổi kích thước
-    background_image = pygame.image.load('normal.png')
-    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH+100, SCREEN_HEIGHT+100))  # Thay đổi kích thước ảnh nền
+    win_surface.fill(WHITE)  # Đặt màu nền là trắng
 
-    win_surface.blit(background_image, (0, 0))  # Vẽ ảnh nền đã được thay đổi kích thước
-    
+    # Tải và thay đổi kích thước hình nền
+    background_image = pygame.image.load('normal.png')
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH + 100, SCREEN_HEIGHT + 100))
+    win_surface.blit(background_image, (0, 0))  # Vẽ hình nền lên bề mặt
+
     # Tạo một bề mặt mờ với cùng kích thước
     overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     overlay_surface.fill((255, 255, 255))  # Màu trắng
-    overlay_surface.set_alpha(128)  # Đặt độ trong suốt (0-255, 0 là trong suốt hoàn toàn, 255 là không trong suốt)
+    overlay_surface.set_alpha(128)  # Đặt độ trong suốt
 
     # Vẽ bề mặt mờ lên bề mặt chính
     win_surface.blit(overlay_surface, (0, 0))
-    
-    new_width=400
-    new_height=200
+
+    # Tải và thay đổi kích thước hình ảnh chiến thắng
     win_img = pygame.image.load("youwin.png")
-    win_img = pygame.transform.scale(win_img, (new_width, new_height))  # Thay đổi kích thước của win_img
+    win_img = pygame.transform.scale(win_img, (400, 200))  # Kích thước hình ảnh
 
-    # Tính toán vị trí để vẽ win_img ở giữa
-    win_x = (SCREEN_WIDTH - new_width) / 2
-    win_y = (SCREEN_HEIGHT - new_height) / 2-100
+    # Tính toán vị trí để vẽ hình ảnh chiến thắng ở giữa
+    win_x = (SCREEN_WIDTH - win_img.get_width()) / 2
+    win_y = (SCREEN_HEIGHT - win_img.get_height()) / 2 - 100
 
-    # Vẽ win_img lên bề mặt
+    # Vẽ hình ảnh chiến thắng lên bề mặt
     win_surface.blit(win_img, (win_x, win_y))
-    
+
+    # Hiển thị điểm số cuối cùng
     final_score_text = font.render(f"Your Score: {score}", True, BLACK)
     final_score_rect = final_score_text.get_rect(center=(SCREEN_WIDTH // 2, 400))
     win_surface.blit(final_score_text, final_score_rect)
+
+    # Tạo nút quay lại menu
     back_text = font.render("Back to Menu", True, BLACK)
     back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2, 500))
-    pygame.draw.rect(win_surface, GRAY, back_rect.inflate(20, 10))
-    win_surface.blit(back_text, back_rect)
+    pygame.draw.rect(win_surface, GRAY, back_rect.inflate(20, 10))  # Vẽ nút
+    win_surface.blit(back_text, back_rect)  # Vẽ văn bản lên nút
 
-    #play_win_music()
-
-    #play_menu_music()
     return win_surface
 
 def draw_win_screen():
