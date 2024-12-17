@@ -252,7 +252,7 @@ def reset_game():
     target_number = random.randint(1, 18)
     selected_cells = []
     score = 0
-    time_left = 2
+    time_left = 60
 
 def has_valid_pair(grid, target):
     size = len(grid)
