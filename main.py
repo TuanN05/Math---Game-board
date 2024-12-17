@@ -5,6 +5,71 @@ complete_sound = pygame.mixer.Sound('sounds/completetask_0.mp3')  # Load the sou
 wrong_sound=pygame.mixer.Sound("sounds/wrong.mp3")
 import random
 
+sprite_sheet=pygame.image.load("images/charge.png")
+
+# Khởi tạo Pygame
+pygame.init()
+
+# Kích thước của mỗi khung hình
+frame_width = 32
+frame_height = 32
+
+class posAnimation():
+    def __init__(self, x, y, x1, y1):
+        self.x=x
+        self.y=y
+        self.x1=x1
+        self.y1=y1
+
+# Tải sprite sheet
+sprite_sheet = pygame.image.load("images/charge.png")
+
+# Kích thước của mỗi khung hình
+frame_width = 32
+frame_height = 32
+pos_ani=posAnimation(0,0,0,0)
+
+# Hàm để hiển thị khung hình
+def draw_frame(surface, sprite_sheet, frame_index, x, y):
+    frame_x = frame_index * frame_width
+    frame_y = 0  # Vì sprite sheet chỉ có một hàng
+    frame = sprite_sheet.subsurface((frame_x, frame_y, frame_width, frame_height))
+    surface.blit(frame, (x, y))
+
+# Hàm để hiển thị hoạt ảnh tại vị trí cụ thể
+def show_animation(surface, sprite_sheet, position, duration, frame_count):
+    """
+    Hiển thị hoạt ảnh tại vị trí cụ thể.
+    
+    :param surface: Bề mặt để vẽ hoạt ảnh.
+    :param sprite_sheet: Sprite sheet chứa các khung hình hoạt ảnh.
+    :param position: Tọa độ (x, y) để vẽ hoạt ảnh.
+    :param duration: Thời gian hoạt ảnh (ms).
+    :param frame_count: Số lượng khung hình trong hoạt ảnh.
+    """
+    clock = pygame.time.Clock()
+    start_time = pygame.time.get_ticks()
+    current_frame_index = 0
+
+    while pygame.time.get_ticks() - start_time < duration:
+        # Xóa bề mặt tạm thời
+        temp_surface = pygame.Surface((frame_width, frame_height), pygame.SRCALPHA)
+        
+        # Vẽ khung hình hoạt ảnh lên bề mặt tạm thời
+        draw_frame(temp_surface, sprite_sheet, current_frame_index, 0, 0)
+
+        # Vẽ bề mặt tạm thời lên màn hình chính
+        surface.blit(temp_surface, position)
+
+        # Cập nhật chỉ số khung hình
+        current_frame_index = (current_frame_index + 1) % frame_count
+
+        # Cập nhật màn hình
+        pygame.display.flip()
+
+        # Giới hạn tốc độ khung hình
+        clock.tick(10)  # 10 khung hình mỗi giây
+
 click_sound.set_volume(0.3)
 
 def slide_transition(current_surface, next_surface, direction="left", speed=20):
@@ -129,11 +194,11 @@ def generate_grid(size):
     target_number = random.choice([num1 + num2, abs(num1 - num2)])
     return grid
 
-#background_image = pygame.image.load('normal.png')
+#background_image = pygame.image.load('images/normal.png')
 
 def draw_grid():
     # Tải ảnh nền và thay đổi kích thước
-    background_image = pygame.image.load('normal.png')
+    background_image = pygame.image.load('images/normal.png')
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT - HEADER_HEIGHT))  # Thay đổi kích thước ảnh nền
 
     screen.blit(background_image, (0, HEADER_HEIGHT))  # Vẽ ảnh nền đã được thay đổi kích thước
@@ -187,7 +252,7 @@ def reset_game():
     target_number = random.randint(1, 18)
     selected_cells = []
     score = 0
-    time_left = 60
+    time_left = 2
 
 def has_valid_pair(grid, target):
     size = len(grid)
@@ -204,6 +269,7 @@ def has_valid_pair(grid, target):
 
 # Kiểm tra xem người chơi đã chọn đủ 2 ô hay chưa
 def check_selection():
+    global pos_ani
     # Nếu người chơi đã chọn đủ 2 ô
     if len(selected_cells) == 2:
         # Lấy thông tin về 2 ô đã chọn
@@ -224,8 +290,12 @@ def check_selection():
                 numbers[cell2[0]][cell2[1]] = None
                 score += 1
                 # Phát âm thanh hoàn thành
+                show_animation(screen, sprite_sheet, (pos_ani.x,pos_ani.y-10), 300, sprite_sheet.get_width() // frame_width)
+                show_animation(screen, sprite_sheet, (pos_ani.x1,pos_ani.y1-10), 300, sprite_sheet.get_width() // frame_width)
+                pos_ani = posAnimation(0,0,0,0)
                 complete_sound.play()
             else:
+                pos_ani = posAnimation(0,0,0,0)
                 wrong_sound.play()
         
         # Xóa thông tin về 2 ô đã chọn
@@ -237,6 +307,7 @@ def check_selection():
             update_grid_for_valid_pair(numbers, target_number)
 
 def handle_click(pos):
+    global pos_ani
     x, y = pos
     if SCREEN_WIDTH - 70 < x < SCREEN_WIDTH - 30 and 30 < y < 70:
         global current_screen, is_paused
@@ -266,6 +337,14 @@ def handle_click(pos):
             if len(selected_cells) < 2 and (row, col) not in selected_cells:
                 selected_cells.append((row, col))
                 click_sound.play()
+                
+            if pos_ani.x==0 or pos_ani.y==0:
+                print(f"click pos:{x} {y}")
+                pos_ani.x = x
+                pos_ani.y = y
+            elif pos_ani.x1==0 or pos_ani.y1==0:
+                pos_ani.x1 = x
+                pos_ani.y1 = y
 
 def draw_button_with_flash(surface, text, pos, is_flashing):
     button_color = GRAY if not is_flashing else RED
@@ -296,7 +375,7 @@ def set_menu_background():
     """
     Đặt hình nền cho màn hình menu.
     """
-    background_image = pygame.image.load('bg_go.png')  # Thay đổi đường dẫn đến hình ảnh của bạn
+    background_image = pygame.image.load('images/bg_go.png')  # Thay đổi đường dẫn đến hình ảnh của bạn
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))  # Thay đổi kích thước hình ảnh
     screen.blit(background_image, (0, 0))  # Vẽ hình nền lên màn hình
 
@@ -431,23 +510,44 @@ def handle_high_score_click(pos):
         current_screen = "menu"
 
 def prepare_game_over_surface():
+    # Tạo bề mặt cho màn hình Game Over
     game_over_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
-    game_over_surface.fill(WHITE)
+    game_over_surface.fill(WHITE)  # Đặt màu nền là trắng
+
+    # Tải và thay đổi kích thước hình nền
+    background_image = pygame.image.load('images/normal.png')  # Thay đổi đường dẫn hình nền nếu cần
+    background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH + 100, SCREEN_HEIGHT + 100))
+    game_over_surface.blit(background_image, (0, 0))  # Vẽ hình nền lên bề mặt
+
+    # Tạo một bề mặt mờ với cùng kích thước
+    overlay_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+    overlay_surface.fill((255, 255, 255))  # Màu trắng
+    overlay_surface.set_alpha(128)  # Đặt độ trong suốt
+
+    # Vẽ bề mặt mờ lên bề mặt chính
+    game_over_surface.blit(overlay_surface, (0, 0))
+
+    # Hiển thị văn bản "Game Over"
     game_over_text = font.render("Game Over", True, BLACK)
     game_over_rect = game_over_text.get_rect(center=(SCREEN_WIDTH // 2, 100))
     game_over_surface.blit(game_over_text, game_over_rect)
+
+    # Hiển thị điểm số cuối cùng
     final_score_text = font.render(f"Your Score: {score}", True, BLACK)
     final_score_rect = final_score_text.get_rect(center=(SCREEN_WIDTH // 2, 300))
     game_over_surface.blit(final_score_text, final_score_rect)
+
+    # Hiển thị điểm số cao nhất
     high_score_text = font.render(f"High Score: {high_score}", True, BLACK)
     high_score_rect = high_score_text.get_rect(center=(SCREEN_WIDTH // 2, 400))
     game_over_surface.blit(high_score_text, high_score_rect)
+
+    # Tạo nút quay lại menu
     back_text = font.render("Back to Menu", True, BLACK)
     back_rect = back_text.get_rect(center=(SCREEN_WIDTH // 2, 500))
-    pygame.draw.rect(game_over_surface, GRAY, back_rect.inflate(20, 10))
-    game_over_surface.blit(back_text, back_rect)
+    pygame.draw.rect(game_over_surface, GRAY, back_rect.inflate(20, 10))  # Vẽ nút
+    game_over_surface.blit(back_text, back_rect)  # Vẽ văn bản lên nút
 
-    play_menu_music()
     return game_over_surface
 
 def draw_game_over():
@@ -460,7 +560,7 @@ def prepare_win_surface():
     win_surface.fill(WHITE)  # Đặt màu nền là trắng
 
     # Tải và thay đổi kích thước hình nền
-    background_image = pygame.image.load('normal.png')
+    background_image = pygame.image.load('images/normal.png')
     background_image = pygame.transform.scale(background_image, (SCREEN_WIDTH + 100, SCREEN_HEIGHT + 100))
     win_surface.blit(background_image, (0, 0))  # Vẽ hình nền lên bề mặt
 
@@ -473,7 +573,7 @@ def prepare_win_surface():
     win_surface.blit(overlay_surface, (0, 0))
 
     # Tải và thay đổi kích thước hình ảnh chiến thắng
-    win_img = pygame.image.load("youwin.png")
+    win_img = pygame.image.load("images/youwin.png")
     win_img = pygame.transform.scale(win_img, (400, 200))  # Kích thước hình ảnh
 
     # Tính toán vị trí để vẽ hình ảnh chiến thắng ở giữa
@@ -520,6 +620,13 @@ def play_win_music():
     """
     pygame.mixer.music.load('sounds/youwin.mp3')  # Thay đổi đường dẫn đến file nhạc nền menu của bạn
     pygame.mixer.music.play(1)  
+    
+def play_game_over_music():
+    """
+    Phát nhạc nền cho màn hình menu.
+    """
+    pygame.mixer.music.load('sounds/gameover.mp3')  # Thay đổi đường dẫn đến file nhạc nền menu của bạn
+    pygame.mixer.music.play(1) 
 
 def save_high_score(score, time_left, filename='high_score.txt'):
     """Lưu điểm cao và thời gian vào file."""
@@ -553,6 +660,7 @@ def main():
                 high_score = max(high_score, score)
                 save_high_score(high_score, time_left)
                 current_screen = "game_over"
+                play_game_over_music()
             elif all(cell is None for row in numbers for cell in row):
                 high_score = max(high_score, score)
                 save_high_score(high_score, time_left)
@@ -582,8 +690,10 @@ def main():
                 elif current_screen == "game":
                     handle_click(event.pos)
                 elif current_screen == "game_over":
+                    play_game_over_music()
                     if 480 < event.pos[1] < 520:
                         current_screen = "menu"
+                        play_menu_music()
                 elif current_screen == "win":
                     if 480 < event.pos[1] < 520:
                         current_screen = "menu"
