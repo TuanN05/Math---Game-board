@@ -1,7 +1,7 @@
 hiện level để lựa chọn - done
 hiệu ứng màu xanh/đỏ khi chọn đúng/sai
-màn hình win
-màn hình game over
+màn hình win - donedone
+màn hình game over - donedone
 màn hình high score
-lưu trữ high score
+lưu trữ high score - donedone
 am thanh khi chon sai - done

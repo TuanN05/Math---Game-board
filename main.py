@@ -1,11 +1,13 @@
 import pygame
+import random
+import time
+
 pygame.mixer.init()
 click_sound = pygame.mixer.Sound('sounds/button01.mp3.wav')  # Load the sound
 complete_sound = pygame.mixer.Sound('sounds/completetask_0.mp3')  # Load the sound
-wrong_sound=pygame.mixer.Sound("sounds/wrong.mp3")
-import random
+wrong_sound = pygame.mixer.Sound("sounds/wrong.mp3")
 
-sprite_sheet=pygame.image.load("images/charge.png")
+sprite_sheet = pygame.image.load("images/charge.png")
 
 # Khởi tạo Pygame
 pygame.init()
@@ -16,18 +18,17 @@ frame_height = 32
 
 class posAnimation():
     def __init__(self, x, y, x1, y1):
-        self.x=x
-        self.y=y
-        self.x1=x1
-        self.y1=y1
+        self.x = x
+        self.y = y
+        self.x1 = x1
+        self.y1 = y1
 
 # Tải sprite sheet
-sprite_sheet = pygame.image.load("images/charge.png")
 
 # Kích thước của mỗi khung hình
 frame_width = 32
 frame_height = 32
-pos_ani=posAnimation(0,0,0,0)
+pos_ani = posAnimation(0, 0, 0, 0)
 
 # Hàm để hiển thị khung hình
 def draw_frame(surface, sprite_sheet, frame_index, x, y):
@@ -93,8 +94,6 @@ def slide_transition(current_surface, next_surface, direction="left", speed=20):
         offset += speed
         clock.tick(60)
 
-pygame.init()
-
 SCREEN_WIDTH, SCREEN_HEIGHT = 600, 700
 CELL_SIZE = 80
 GRID_PADDING = 10
@@ -152,28 +151,28 @@ def update_grid_for_valid_pair(grid, target):
     # Chọn ngẫu nhiên 2 ô đã có giá trị
     (row1, col1), (row2, col2) = random.sample(existing_cells, 2)
     
-    checktmp=False
-    while checktmp==False:
+    checktmp = False
+    while checktmp == False:
         # Tạo giá trị cho ô thứ nhất
         num1 = random.randint(0, 9)
-        checktmp=True
+        checktmp = True
         
         # Tạo giá trị cho ô thứ hai sao cho tổng hoặc hiệu của 2 giá trị bằng với số mục tiêu
         if random.choice([True, False]):
             # Tổng của 2 giá trị bằng với số mục tiêu
             num2 = target - num1
             # Đảm bảo giá trị của ô thứ hai nằm trong 0 đến 9
-            if num2 < 0 or num2>9:
+            if num2 < 0 or num2 > 9:
                 num2 = 0
-                checktmp=False
+                checktmp = False
             
         else:
             # Hiệu của 2 giá trị bằng với số mục tiêu
             num2 = num1 - target
             # Đảm bảo giá trị của ô thứ hai nằm trong 0 đến 9
-            if num2 < 0 or num2>9:
+            if num2 < 0 or num2 > 9:
                 num2 = 0
-                checktmp=False
+                checktmp = False
     
     # Cập nhật giá trị của 2 ô đã chọn
     grid[row1][col1] = num1
@@ -209,6 +208,7 @@ def draw_grid():
 
     # Tính toán vị trí bắt đầu để căn giữa
     start_x = (SCREEN_WIDTH - total_grid_width) // 2
+    start_y = HEADER_HEIGHT + (SCREEN_HEIGHT - HEADER_HEIGHT - total_grid_height) // 2
     start_y = HEADER_HEIGHT + (SCREEN_HEIGHT - HEADER_HEIGHT - total_grid_height) // 2
 
     for row in range(grid_size):
@@ -249,7 +249,7 @@ def draw_header():
 def reset_game():
     global numbers, target_number, selected_cells, score, time_left
     numbers = generate_grid(grid_size)
-    target_number = random.randint(1, 18)
+    target_number = random.randint(1, 15)
     selected_cells = []
     score = 0
     time_left = 60
@@ -297,6 +297,15 @@ def check_selection():
             else:
                 pos_ani = posAnimation(0,0,0,0)
                 wrong_sound.play()
+                postmp=get_cell_position(cell1)
+                postmp1=get_cell_position(cell2)
+                pygame.draw.rect(screen, RED, (postmp[0],postmp[1], CELL_SIZE, CELL_SIZE), border_radius=5)
+                pygame.draw.rect(screen, RED, (postmp1[0],postmp1[1], CELL_SIZE, CELL_SIZE), border_radius=5)
+                pygame.display.flip()
+                time.sleep(0.2)
+                pygame.draw.rect(screen, WHITE, (postmp[0],postmp[1], CELL_SIZE, CELL_SIZE), border_radius=5)
+                pygame.draw.rect(screen, WHITE, (postmp1[0],postmp1[1], CELL_SIZE, CELL_SIZE), border_radius=5)
+                pygame.display.flip()
         
         # Xóa thông tin về 2 ô đã chọn
         selected_cells.clear()
@@ -305,15 +314,25 @@ def check_selection():
         if not has_valid_pair(numbers, target_number):
             # Nếu không, cập nhật bàn cờ để có cặp giá trị hợp lệ
             update_grid_for_valid_pair(numbers, target_number)
+            
+def get_cell_position(cell):
+    row, col = cell  # Lấy hàng và cột từ ô đã chọn
+    start_x = (SCREEN_WIDTH - (grid_size * (CELL_SIZE + GRID_PADDING))) // 2
+    start_y = HEADER_HEIGHT + (SCREEN_HEIGHT - HEADER_HEIGHT - (grid_size * (CELL_SIZE + GRID_PADDING))) // 2
+    
+    x = start_x + col * (CELL_SIZE + GRID_PADDING)+5
+    y = start_y + row * (CELL_SIZE + GRID_PADDING)+5
+    return (x, y)  # Trả về vị trí (x, y)
+
 
 def handle_click(pos):
     global pos_ani
     x, y = pos
+    #nút menu màn hình
     if SCREEN_WIDTH - 70 < x < SCREEN_WIDTH - 30 and 30 < y < 70:
         global current_screen, is_paused
         click_sound.play()  # Phát âm thanh khi nhấn nút
         play_menu_music()
-        print("Đã nhấn Menu")
         current_surface = screen.copy()  # Sao chép màn hình hiện tại
         next_surface = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))  # Tạo màn hình mới cho menu
         next_surface.fill(WHITE)  # Đặt màu nền cho màn hình mới
@@ -339,7 +358,6 @@ def handle_click(pos):
                 click_sound.play()
                 
             if pos_ani.x==0 or pos_ani.y==0:
-                print(f"click pos:{x} {y}")
                 pos_ani.x = x
                 pos_ani.y = y
             elif pos_ani.x1==0 or pos_ani.y1==0:
